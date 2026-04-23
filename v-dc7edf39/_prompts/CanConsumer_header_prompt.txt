@@ -1,0 +1,365 @@
+=== TASK: Generate Standard C++ Header File ===
+
+You are generating a production-quality STANDARD C++ HEADER FILE (.hpp)
+for the software component: CanConsumer
+
+Namespace  : probe
+File name  : CanConsumer.hpp
+
+
+Requirements:
+- Standard C++14 / C++17 
+- Complete Doxygen documentation on EVERY element (file, namespace, class,
+  every method, every member variable, every constant, every enum value)
+- #pragma once as the very first line
+- Doxygen @file block immediately after #pragma once, BEFORE any #include
+- All inter-component dependencies included using relative paths
+- Only standard library headers — no ara:: or AUTOSAR headers
+- Class declaration with ALL methods and private members
+
+
+=== MANDATORY CODING STANDARDS ===
+
+You MUST follow ALL of the following rules without exception.
+Generate STANDARD C++ ONLY 
+
+--- C++14 / C++17 Rules ---
+1.  Use std::optional<T> for functions that may return a value or nothing.
+    Use bool + output parameter, or exceptions for error-returning functions.
+    Never use raw error codes without documenting their meaning.
+2.  Use std::cout / std::cerr for output, or accept a logger interface via
+    constructor injection. Never use printf or AUTOSAR logging APIs.
+3.  Use std::thread, std::mutex, std::condition_variable for concurrency.
+4.  Use std::future / std::promise / std::async for asynchronous operations.
+5.  Use std::unique_ptr / std::shared_ptr for all heap-allocated objects.
+    Never use raw new / delete.
+6.  Wrap all code in the project namespace provided.
+7.  Use #pragma once in ALL header files.
+8.  Use fixed-width integer types where bit-width matters:
+    uint8_t, uint16_t, uint32_t, uint64_t,
+    int8_t,  int16_t,  int32_t,  int64_t  (from <cstdint>).
+    Use int / size_t / ptrdiff_t for general-purpose indexing and sizes.
+9.  Prefer stack allocation. Minimize heap allocations — use RAII for all
+    resources (files, sockets, mutexes, threads).
+10. Thread safety: protect all shared data with std::mutex or std::atomic.
+
+--- MISRA C++-inspired Rules ---
+M1.  No raw owning pointers. Use std::unique_ptr or std::shared_ptr.
+     Non-owning raw pointers (observers) are allowed where lifetime is clear.
+M2.  All variables MUST be initialized at the point of declaration.
+M3.  const correctness: every parameter/member that is not modified MUST be const.
+M4.  No implicit type conversions. Use explicit casts only (static_cast, etc.).
+M5.  Every switch statement MUST have a default case.
+M6.  No recursion unless depth is strictly bounded and documented.
+M7.  Single responsibility: each function does exactly one thing.
+M8.  Validate all function parameters before use.
+M9.  Mark noexcept on all functions that are guaranteed not to throw.
+M10. No C-style casts. Use static_cast, reinterpret_cast only where necessary.
+M11. No macros for constants — use constexpr or const instead.
+M12. All #include paths must use the exact component folder structure.
+M13. No unused variables or parameters (use [[maybe_unused]] if needed).
+M14. Boolean expressions must be explicit (no implicit int-to-bool).
+M15. No goto statements.
+
+--ISO_Guidlines------
+ISO 26262 functional safety requirements (ASIL‑B),
+- ISO/IEC 14882 (C++ language standard),
+
+--- File Structure Rules ---
+F1.  Header file (.hpp): #pragma once FIRST, then Doxygen @file block,
+     then #include directives, then namespace + class declaration.
+F2.  CPP file (.cpp): Doxygen @file block at very top BEFORE any #include,
+     then #include directives, then implementations.
+F3.  Inter-component includes use relative paths:
+     #include "../ComponentName/ComponentName.hpp"
+F4.  Only standard library headers use angle brackets:
+     #include <string>
+     #include <vector>
+     #include <memory>
+     #include <mutex>
+     #include <optional>
+     DO NOT include any ara:: or AUTOSAR headers — they do not exist here.
+
+
+
+=== MANDATORY DOXYGEN DOCUMENTATION RULES ===
+
+All generated code MUST include comprehensive Doxygen documentation
+that passes `doxygen -w` without warnings. Follow ALL rules below:
+
+--- FILE-LEVEL (every .hpp AND .cpp file) ---
+D1. For .hpp files: place #pragma once FIRST, then IMMEDIATELY after place
+    the Doxygen @file block BEFORE any #include directives.
+    For .cpp files: place the Doxygen @file block at the very top BEFORE
+    any #include directives.
+    The block MUST contain:
+      @file    <exact filename with extension>
+      @brief   <one-line summary of the file's purpose>
+      @details <2-3 sentences explaining the component's role in the system>
+      @author  <team or individual name>
+      @date    <YYYY-MM-DD creation date>
+      @version <semantic version e.g. 1.0.0>
+      @copyright Copyright (c) 2024 Company. All rights reserved.
+
+    Example for .hpp:
+    /**
+     * @file   DataProcessor.hpp
+     * @brief  Processes incoming sensor data and dispatches results.
+     * @details Receives raw data buffers, applies filtering and calibration,
+     *          then forwards processed results to registered consumers.
+     *          Thread-safe for concurrent producer/consumer access.
+     * @author  Engineering Team
+     * @date    2024-01-01
+     * @version 1.0.0
+     * @copyright Copyright (c) 2024 Company. All rights reserved.
+     */
+
+--- NAMESPACE-LEVEL ---
+D2. Document EVERY namespace with:
+      @namespace <name>
+      @brief     <purpose of this namespace>
+
+    Example:
+    /// @namespace probe
+    /// @brief Contains all components of the probe application.
+    namespace probe {
+
+--- MODULE GROUPING ---
+D3. Use @defgroup in ONE central header per module and @ingroup in all
+    related files to group components logically.
+
+    Example in central header:
+    /**
+     * @defgroup DataAcquisition Data Acquisition Components
+     * @brief Components responsible for collecting and buffering sensor data.
+     */
+
+    Example in related file:
+    /**
+     * @ingroup DataAcquisition
+     */
+
+--- CLASS / STRUCT / ENUM LEVEL ---
+D4. Every class, struct, and enum MUST have:
+      @class / @struct / @enum <Exact_Name> (NO spaces — use underscores)
+      @brief    <one-line summary>
+      @details  <multi-line: responsibilities, design rationale,
+                 thread-safety guarantees, and lifecycle>
+      @ingroup  <module group from D3>
+      @note     <coding standard compliance notes>
+      @warning  <misuse hazards>
+      @invariant <class invariants e.g. mutex ownership rules>
+      @see      <cross-references to related classes>
+
+D5. Every member variable (public AND private) MUST have:
+      @brief <purpose, valid range, units if applicable>
+
+    Example:
+    uint32_t retryCount_{0U};  ///< @brief Current retry count. Range: [0, maxRetryCount_].
+
+D6. Every enum value MUST have:
+      @brief <meaning and when this value is used>
+
+--- FUNCTION / METHOD LEVEL ---
+D7. Every function and method (public, private, free, static) MUST have:
+      @brief   <one-line summary starting with a verb>
+      @details <multi-line: algorithm/strategy, thread-safety,
+                error handling approach, interaction with other components>
+      @param[in] / @param[out] / @param[in,out] for EVERY parameter with:
+                description, valid range, and units
+                NEVER use bare @param without direction qualifier!
+      @return  <type and description>
+                NEVER write "@return void" — omit @return entirely for void functions
+      @retval  <value> <when this value is returned> — one per distinct return value
+               Example:
+               @retval true  Operation completed successfully
+               @retval false Input validation failed or resource unavailable
+      @throws  <ExceptionType> <when it is thrown> — or "None" for noexcept functions
+      @pre     <precondition(s) the caller must satisfy>
+      @post    <guaranteed state after the call>
+      @note    <compliance notes, implementation caveats>
+      @warning <deadlock risks, blocking behavior, performance implications>
+      @see     <related functions or classes>
+      @requirements <SWR-REQ-XX-XX-XXX> traceability to software requirements
+      @rationale <design decision explanation when approach is non-obvious>
+
+--- CONSTANTS AND MACROS ---
+D8. Every constexpr, const, and static variable MUST have:
+      @brief   <purpose>
+      @details <valid range, units, derivation of magic numbers>
+
+    Example:
+    /// @brief Maximum number of retry attempts before giving up.
+    /// @details Set to 5 based on the 10-second startup timeout requirement,
+    ///          allowing one retry per 2 seconds.
+    static constexpr uint8_t kMaxRetryCount{5U};
+
+--- CONSISTENCY RULES ---
+D9. Use IDENTICAL formatting across ALL files:
+    - Always use @param[in], @param[out], or @param[in,out] — NEVER bare @param
+    - Always place @file block BEFORE #include directives
+    - Use consistent @copyright string: "Copyright (c) 2024 Company. All rights reserved."
+    - Use /** ... */ style for all multi-line Doxygen blocks
+    - Use ///< for inline member variable documentation
+
+--- THINGS TO NEVER DO ---
+D10. DO NOT:
+    - Write "@return void" (just omit @return entirely for void functions)
+    - Place @file blocks AFTER #include directives
+    - Leave struct/enum members without @brief
+    - Use bare @param without direction qualifier [in]/[out]/[in,out]
+    - Skip Doxygen on .cpp file internal helpers, structs, enums, or constants
+    - Use inconsistent @copyright formats between files
+    - Omit @pre/@post on safety-critical functions
+    - Omit @retval when multiple return values are possible
+    - Use spaces in @class, @struct, or @enum tag names (use underscores)
+    - Leave any function, method, variable, or constant undocumented
+
+
+=== COMPONENT OVERVIEW: CanConsumer ===
+Total functions : 7
+
+=== ALL FUNCTIONS IN CanConsumer ===
+
+--- Function: CanConsumer ---
+Unit ID      : CC-001
+Requirements : SWR-REQ-01-01-001
+Description  : Constructs CAN consumer with shared memory handle for signal reading
+Rationale    : Initializes CanConsumer
+Parameters   : void* memHandle
+Return type  : void
+Called by    : ProbeApp
+Call condition: Startup
+
+Doxygen hints for CanConsumer:
+  @requirements SWR-REQ-01-01-001
+  @note Called by: ProbeApp
+  @retval false/error — see Error Handling section
+
+--- Function: ReadCanData100ms ---
+Unit ID      : CC-002
+Requirements : SWR-REQ-01-001;SWR-REQ-01-01-001
+Description  : Reads CAN RX/TX signals from shared memory for 100ms periodicity
+Rationale    : Reads CAN data at 100ms rate
+Parameters   : none (void)
+Returns      : std::vector<uint8_t> (Return_Value)
+Called by    : ProbeApp
+Call condition: Cyclic_100ms
+
+Doxygen hints for ReadCanData100ms:
+  @requirements SWR-REQ-01-001;SWR-REQ-01-01-001
+  @note Called by: ProbeApp
+  @retval false/error — see Error Handling section
+
+--- Function: ReadCanData1000ms ---
+Unit ID      : CC-003
+Requirements : SWR-REQ-01-002;SWR-REQ-01-01-001
+Description  : Reads CAN RX/TX signals from shared memory for 1000ms periodicity
+Rationale    : Reads CAN data at 1000ms rate
+Parameters   : none (void)
+Returns      : std::vector<uint8_t> (Return_Value)
+Called by    : ProbeApp
+Call condition: Cyclic_1000ms
+
+Doxygen hints for ReadCanData1000ms:
+  @requirements SWR-REQ-01-002;SWR-REQ-01-01-001
+  @note Called by: ProbeApp
+  @retval false/error — see Error Handling section
+
+--- Function: ReadCanRxData ---
+Unit ID      : CC-004
+Requirements : SWR-REQ-01-01-001
+Description  : Reads a specific CAN RX signal from shared memory by signal ID
+Rationale    : Reads CAN RX signal data
+Parameters   : uint32_t signalId
+Returns      : std::vector<uint8_t> (Return_Value)
+Called by    : CanConsumer
+Call condition: On_Request
+
+Doxygen hints for ReadCanRxData:
+  @requirements SWR-REQ-01-01-001
+  @note Called by: CanConsumer
+  @retval false/error — see Error Handling section
+
+--- Function: ReadCanTxData ---
+Unit ID      : CC-005
+Requirements : SWR-REQ-01-01-001
+Description  : Reads a specific CAN TX signal from shared memory by signal ID
+Rationale    : Reads CAN TX signal data
+Parameters   : uint32_t signalId
+Returns      : std::vector<uint8_t> (Return_Value)
+Called by    : CanConsumer
+Call condition: On_Request
+
+Doxygen hints for ReadCanTxData:
+  @requirements SWR-REQ-01-01-001
+  @note Called by: CanConsumer
+  @retval false/error — see Error Handling section
+
+--- Function: CollectTimestamp ---
+Unit ID      : CC-006
+Requirements : SWR-REQ-01-003;SWR-REQ-03-01-005
+Description  : Captures seconds and milliseconds timestamp at the time of signal collection
+Rationale    : Collects timestamp at signal acquisition time
+Parameters   : none (void)
+Returns      : uint64_t (Return_Value)
+Called by    : CanConsumer
+Call condition: On_Request
+
+Doxygen hints for CollectTimestamp:
+  @requirements SWR-REQ-01-003;SWR-REQ-03-01-005
+  @note Called by: CanConsumer
+  @retval false/error — see Error Handling section
+
+--- Function: ValidateSignalData ---
+Unit ID      : CC-007
+Requirements : SWR-REQ-01-01-001
+Description  : Checks if the collected signal data is valid
+Rationale    : Validates collected signal data
+Parameters   : std::vector<uint8_t> data
+Returns      : bool (Return_Value)
+Called by    : CanConsumer
+Call condition: On_Request
+
+Doxygen hints for ValidateSignalData:
+  @requirements SWR-REQ-01-01-001
+  @note Called by: CanConsumer
+  @retval false/error — see Error Handling section
+
+=== PRIVATE MEMBER VARIABLES ===
+Declare these as private member variables in the class.
+Every member MUST have an ///< @brief inline Doxygen comment.
+Infer the correct standard C++ type from context and usage.
+Do NOT use any ara:: or AUTOSAR types — use std:: equivalents only.
+  - sharedMemHandle;timestampSec;timestampMsec;signalIdMap
+  - sharedMemHandle
+  - timestampSec;timestampMsec
+
+=== OUTPUT INSTRUCTIONS FOR HEADER ===
+
+Generate ONLY the complete CanConsumer.hpp file.
+
+EXACT structure order:
+1. #pragma once                          <- very first line
+2. Doxygen @file block                   <- BEFORE any #include
+3. All #include directives (standard library only — NO ara:: headers)
+4. @defgroup or @ingroup declaration
+5. namespace probe opening
+6. @namespace Doxygen block
+7. Class Doxygen block (@class, @brief, @details, @ingroup, @note, @warning, @invariant, @see)
+8. Class declaration with:
+   - All public methods with FULL Doxygen (@brief, @details, @param[in/out], @return, @retval, @pre, @post, @throws, @note, @warning, @requirements, @rationale)
+   - All private member variables with ///< @brief inline comments
+   - All private methods with full Doxygen
+   - All constexpr/const with @brief @details
+9. namespace closing brace
+
+STRICT RULES:
+- Do NOT write "@return void" — omit @return entirely for void functions
+- Do NOT use bare @param — always @param[in], @param[out], or @param[in,out]
+- Do NOT place @file block after any #include
+- Do NOT leave any element undocumented
+- Do NOT include any ara:: headers (ara/core, ara/log, ara/com, ara/exec, etc.)
+- Do NOT use any ara:: types anywhere in the code
+- Do NOT add any explanation text outside the C++ code
+- Output ONLY valid standard C++ code
